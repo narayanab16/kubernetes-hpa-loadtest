@@ -19,7 +19,7 @@ public class K8sLoadTestClient {
     public K8sLoadTestClient(WebClient webClient) {
         this.webClient = webClient;
     }
-    private Mono<String> k8sHPALoadTestServer(K8sLoadTestClient client) {
+    private Mono<String> k8sHPALoadTestServer() {
         return this.webClient.get().uri("/").accept(MediaType.APPLICATION_JSON)
                 .exchangeToMono(x ->
                         x.statusCode().equals(HttpStatus.OK) ?
@@ -34,7 +34,7 @@ public class K8sLoadTestClient {
         try{
             for (int i = 0; i < load_it; i++) {
                 Future<String> retValue = executorService.submit(() -> {
-                    Mono<String> stringMono = client.k8sHPALoadTestServer(client);
+                    Mono<String> stringMono = client.k8sHPALoadTestServer();
                     String response = stringMono.block();
                     return response;
                 });
@@ -63,8 +63,8 @@ public class K8sLoadTestClient {
     public static void main(String[] args) {
         WebClient webClient =
                 WebClient.builder().baseUrl("http://localhost:8082").build();
-        int FIXED_THREAD_POOL_SIZE = 20;
-        int LOAD_ITERATIONS = 200000; // 100K iterations
+        int FIXED_THREAD_POOL_SIZE = 20; // 20 Threads in Thread Pool
+        int LOAD_ITERATIONS = 200000; // 200K iterations (Requests)
         K8sLoadTestClient client = new K8sLoadTestClient(webClient);
         k8sHPALoadTest(client, FIXED_THREAD_POOL_SIZE, LOAD_ITERATIONS);
     }
