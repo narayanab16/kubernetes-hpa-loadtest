@@ -31,6 +31,7 @@ public class K8sLoadTestClient {
     private static void k8sHPALoadTest(K8sLoadTestClient client, int ftps, int load_it) {
         ExecutorService executorService = Executors.newFixedThreadPool(ftps);
         List<Future<String>> responseList = new ArrayList<>();
+        long startTime  = System.currentTimeMillis();
         try{
             for (int i = 0; i < load_it; i++) {
                 Future<String> retValue = executorService.submit(() -> {
@@ -45,6 +46,7 @@ public class K8sLoadTestClient {
         }
         executorService.shutdown();
         while (!executorService.isTerminated()){}
+        long elapsedTime = ((System.currentTimeMillis() - startTime)/(1000 * 60));
         AtomicLong counter = new AtomicLong();
         responseList.stream().forEach(x -> {
             try {
@@ -58,6 +60,7 @@ public class K8sLoadTestClient {
             }
         });
         System.out.println("Total requests : " + counter.get());
+        System.out.println("Elapsed Time in mins : " + elapsedTime);
     }
 
     public static void main(String[] args) {
